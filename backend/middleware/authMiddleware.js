@@ -1,6 +1,8 @@
+import User from "../models/user.js"
 import jwt from "jsonwebtoken";
 
 const authMiddleware = (req, res, next) => {
+    //grab the tokens from user
   try {
     const authHeader = req.headers.authorization;
 
@@ -23,6 +25,7 @@ const authMiddleware = (req, res, next) => {
     next();
 
   } catch (error) {
+    console.log("JWT verification failed")
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token"

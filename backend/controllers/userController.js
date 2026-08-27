@@ -134,3 +134,102 @@ export async function getLoginUser(req, res) {
     });
   }
 }
+
+// to update user details
+export async function updateProfile(req, res) {
+  const { name, email } = req.body;
+
+  if (!name || !email || !validator.isEmail(email)) {
+    return res.status(400).json({
+      success: false,
+      message: "Valid email and name are required"
+    });
+  }
+
+  try {
+    // Check whether another user already has this email
+    const exists = await User.findOne({
+      email,
+      _id: { $ne: req.user.id }
+    });
+
+    if (exists) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already in use!"
+      });
+    }
+
+    // Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { name, email },
+      {
+        new: true,
+        runValidators: true
+      }
+    ).select("name email");
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      user: updatedUser
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error!"
+    });
+  }
+}
+
+//to update the current password
+export async function changePassword(req,res){
+    const {currentPassword ,newPassword} = req.body;
+
+    if(!currentPassword || !newPassword){
+        return res.status(400).json({
+            success:false,
+            message:"Enter both passwords"
+        })
+    }
+
+    try {
+        const user = await User.findById(req.body.id).select("password");
+        if(!user){
+            return res.status(404).json({
+                success:false,
+                message:"User not Found"
+            })
+        }
+        const match = await bcrypt.compare(currentPassword,user.password);
+        if(!match){
+            return res.status(201).json({
+                success:false,
+                message:"Current password is  Incorrect"
+            })
+        }
+        user.password = await bcrypt.hash(newPassword,10);
+        await user.save();
+        res.json({
+            success:true,
+            message:"Password changed !"
+        })
+
+    } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      msg: "Internal server Error !",
+    });
+  }
+}
