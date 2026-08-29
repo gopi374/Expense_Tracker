@@ -2,8 +2,11 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
+
+//Routes
 import Authrouter from "./routes/userRoutes.js";
 import incomeRouter from "./routes/incomeRoutes.js";
+import expenseRouter from "./routes/expenseRoutes.js";
 
 dotenv.config();
 
@@ -27,6 +30,7 @@ app.get("/", (req, res) => {
 
 app.use("/auth",Authrouter);
 app.use("/income",incomeRouter);
+app.use("/expense",expenseRouter);
 
 
 

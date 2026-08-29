@@ -44,7 +44,7 @@ export async function getAllincome(req, res) {
     const income = await incomeModel.find({ userid }).sort({ date: -1 });
     res.json(income);
   } catch (error) {
-    console.log("Cannot Add Income ", error);
+    console.log("Cannot get All Incomes ", error);
     res.status(500).json({
       suucess: false,
       message: "Internal server Error",
