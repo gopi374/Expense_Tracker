@@ -7,6 +7,7 @@ import { connectDB } from "./config/db.js";
 import Authrouter from "./routes/userRoutes.js";
 import incomeRouter from "./routes/incomeRoutes.js";
 import expenseRouter from "./routes/expenseRoutes.js";
+import dashRouter from "./routes/dashboardRoutes.js";
 
 dotenv.config();
 
@@ -31,7 +32,7 @@ app.get("/", (req, res) => {
 app.use("/auth",Authrouter);
 app.use("/income",incomeRouter);
 app.use("/expense",expenseRouter);
-
+app.use("/dashboard",dashRouter);
 
 
 // Server
