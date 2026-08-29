@@ -1,5 +1,4 @@
 import express from "express"
-import { Router } from "express";
 import { loginUSer, registerUser, getLoginUser, updateProfile, changePassword } from "../controllers/userController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 

@@ -1,16 +1,16 @@
-import incomeModel from "../models/income";
+import incomeModel from "../models/income.js";
 import XLSX from "xlsx";
-import getDateRange from "../utils/dataFilter";
+import getDateRange from "../utils/dataFilter.js";
 
 export async function addIncome(req, res) {
-  const userid = req.user._id;
+  const userid = req.user.id;
   const { description, amount, category, date } = req.body;
 
   try {
     if (!description || !amount || !category || !date) {
       return res.status(404).json({
         success: false,
-        message: "All feilds required !",
+        message: "All fields required !",
       });
     }
 
@@ -29,7 +29,7 @@ export async function addIncome(req, res) {
   } catch (error) {
     console.log("Cannot Add Income ", error);
     res.status(500).json({
-      suucess: false,
+      success: false,
       message: "Internal server Error",
     });
   }
@@ -38,7 +38,7 @@ export async function addIncome(req, res) {
 //to get sll income
 
 export async function getAllincome(req, res) {
-  const userid = req.user._id;
+  const userid = req.user.id;
 
   try {
     const income = await incomeModel.find({ userid }).sort({ date: -1 });
@@ -52,10 +52,11 @@ export async function getAllincome(req, res) {
   }
 }
 
-//update income
+
+// Update income
 export async function updateIncome(req, res) {
   const { id } = req.params;
-  const userid = req.user._id;
+  const userid = req.user.id;
   const { description, amount } = req.body;
 
   try {
@@ -64,26 +65,32 @@ export async function updateIncome(req, res) {
         _id: id,
         userid,
       },
-      { description, amount },
-      { new: true },
+      {
+        description,
+        amount,
+      },
+      {
+        returnDocument: "after",
+      }
     );
-    if(!updateIncome){
-        return res.status(404).json({
-            success:false,
-            message:"Income NOt Found !"
-        })
+
+    if (!updatedIncome) {
+      return res.status(404).json({
+        success: false,
+        message: "Income Not Found!",
+      });
     }
 
-    res.json({
-        success:true,
-        message:"Income updated SuccessFully !",
-        data:updateIncome
-    })
-
+    return res.json({
+      success: true,
+      message: "Income Updated Successfully!",
+      data: updatedIncome,
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      suucess: false,
+
+    return res.status(500).json({
+      success: false,
       message: "Internal server Error",
     });
   }
@@ -118,7 +125,7 @@ export async function deleteIncome(req,res){
 
 //to download data in sheets
 export async function downnloadIncome(req,res){
-    const userid =  req.user._id;
+    const userid =  req.user.id;
 
     try {
         const income = await incomeModel.find({userid}).sort({date:-1});
@@ -146,4 +153,55 @@ export async function downnloadIncome(req,res){
 }
 
 
-//
+//to get income overview
+export async function getIncomeOverview(req, res) {
+  try {
+    const userid = req.user.id;
+
+    const { range = "monthly" } = req.body;
+
+    const { start, end } = getDateRange(range);
+
+    const incomes = await incomeModel
+      .find({
+        userid,
+        date: {
+          $gte: start,
+          $lt: end,
+        },
+      })
+      .sort({ date: -1 });
+
+    const totalIncome = incomes.reduce(
+      (acc, cur) => acc + cur.amount,
+      0
+    );
+
+    const avgIncome =
+      incomes.length > 0
+        ? totalIncome / incomes.length
+        : 0;
+
+    const numberofTransactions = incomes.length;
+
+    const recentTransactions = incomes.slice(0, 9);
+
+    return res.json({
+      success: true,
+      data: {
+        totalIncome,
+        avgIncome,
+        numberofTransactions,
+        recentTransactions,
+        range,
+      },
+    });
+  } catch (error) {
+    console.log("Income Overview Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server Error",
+    });
+  }
+}

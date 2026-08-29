@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import Authrouter from "./routes/userRoutes.js";
+import incomeRouter from "./routes/incomeRoutes.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth",Authrouter);
+app.use("/income",incomeRouter);
 
 
 
