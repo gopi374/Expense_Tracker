@@ -1,45 +1,46 @@
 /* eslint-disable no-undef */
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate
-} from "react-router-dom";
+import {Routes,Route, useNavigate} from "react-router-dom";
+import Layout from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
+import { useState } from "react";
 
-import Login from "./pages/Auth/Login";
-import SignUp from "./pages/Auth/SignUp";
-import Home from "./pages/Dashboard/Home";
-import Expense from "./pages/Dashboard/Expense";
-import Income from "./pages/Dashboard/Income";
+const App = ()=> {
+  const [user,setUser]=useState(null);
 
-function App() {
+  const [token,setToken]=useState(null);
+
+  const navigate = useNavigate();
+
+  const clearAuth=()=>{
+    try{
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("token");
+
+    }catch(err){
+      console.error("clearAuth error :",err); 
+    }
+    setUser(null);
+    setToken(null);
+  }
+
+  const handleLogout = () =>{
+    clearAuth();
+    navigate("/login");
+  }
+
   return (
-    <div>
-      <Router>
+    <>
         <Routes>
-          <Route path="/" element={<Root />} />
-          <Route path="/login" exact element={<Login />} />
-          <Route path="/signup" exact element={<SignUp />} />
-          <Route path="/dashboard" exact element={<Home />} />
-          <Route path="/income" exact element={<Income />} />
-          <Route path="/expense" exact element={<Expense />} />
+          <Route element={<Layout/>}>
+            <Route path="/" element={<Dashboard/>}/>
+          </Route>
         </Routes>
-      </Router>
-    </div>
+    </>
   )
-}
+};
 
 export default App
 
 
-const Root = () =>{
-  const IsAuthenticated = !!localStorage.getItem("token");
-
-  //redirt to dashboard
-
-  return IsAuthenticated ? (
-    <Navigate to="/dashboard"/>
-  ) : (
-    <Navigate to="/login"/>
-  );
-}
