@@ -8,4 +8,4 @@ const Layout = (onLogout, user) => {
     )
 }
 
-export default Layout
+export default Layout;
